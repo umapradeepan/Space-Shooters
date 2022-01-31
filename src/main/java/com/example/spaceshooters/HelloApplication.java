@@ -35,7 +35,7 @@ public class HelloApplication extends Application {
     private static final Random RAND = new Random();
     private static final int WIDTH = 800;
     private static final int HEIGHT = 600;
-    private static final int PLAYER_SIZE = 60;
+    private static final int PLAYER_SIZE = 70;
     Image PLAYER_IMG;
     Image EXPLOSION_IMG;
     static final int EXPLOSION_W = 128;
@@ -57,6 +57,7 @@ public class HelloApplication extends Application {
 
     private double mouseX;
     private int score;
+    private int health;
 
     //start
     public void start(Stage stage) throws Exception {
@@ -68,7 +69,7 @@ public class HelloApplication extends Application {
             System.out.println(System.getProperty("user.dir"));
             return;
         }
-        System.out.println("got these two");
+
         for (int i = 1; i <= 10; i++) {
             try {
                 BOMBS_IMG[i-1] = new Image(new FileInputStream("src/main/resources/images/" + i + ".png"));
@@ -107,6 +108,7 @@ public class HelloApplication extends Application {
         Bombs = new ArrayList<>();
         player = new Rocket(WIDTH / 2, HEIGHT - PLAYER_SIZE, PLAYER_SIZE, PLAYER_IMG);
         score = 0;
+        health = 100;
         IntStream.range(0, MAX_BOMBS).mapToObj(i -> this.newBomb()).forEach(Bombs::add);
     }
 
@@ -118,6 +120,7 @@ public class HelloApplication extends Application {
         gc.setFont(Font.font(20));
         gc.setFill(Color.WHITE);
         gc.fillText("Score: " + score, 60,  20);
+        gc.fillText("Health : " + health, 700, 20);
 
 
         if(gameOver) {
@@ -133,7 +136,7 @@ public class HelloApplication extends Application {
         player.posX = (int) mouseX;
 
         Bombs.stream().peek(Rocket::update).peek(Rocket::draw).forEach(e -> {
-            if(player.colide(e) && !player.exploding) {
+            if(player.collide(e) && !player.exploding) {
                 player.explode();
             }
         });
@@ -148,7 +151,7 @@ public class HelloApplication extends Application {
             shot.update();
             shot.draw();
             for (Bomb bomb : Bombs) {
-                if(shot.colide(bomb) && !bomb.exploding) {
+                if(shot.collide(bomb) && !bomb.exploding) {
                     score++;
                     bomb.explode();
                     shot.toRemove = true;
@@ -207,7 +210,7 @@ public class HelloApplication extends Application {
             }
         }
 
-        public boolean colide(Rocket other) {
+        public boolean collide(Rocket other) {
             int d = distance(this.posX + size / 2, this.posY + size /2,
                     other.posX + other.size / 2, other.posY + other.size / 2);
             return d < other.size / 2 + this.size / 2 ;
@@ -232,7 +235,10 @@ public class HelloApplication extends Application {
         public void update() {
             super.update();
             if(!exploding && !destroyed) posY += SPEED;
-            if(posY > HEIGHT) destroyed = true;
+            if(posY > HEIGHT) {
+                destroyed = true;
+                health -= 5;
+            }
         }
     }
 
@@ -254,18 +260,13 @@ public class HelloApplication extends Application {
         }
 
 
+        // draw the style of the bullets
         public void draw() {
-            gc.setFill(Color.RED);
-            if (score >=50 && score<=70 || score>=120) {
-                gc.setFill(Color.YELLOWGREEN);
-                speed = 50;
-                gc.fillRect(posX-5, posY-10, size+10, size+30);
-            } else {
-                gc.fillOval(posX, posY, size, size);
-            }
+            gc.setFill(Color.LIGHTYELLOW);
+            gc.fillRect(posX-5, posY-10, size, size+25);
         }
 
-        public boolean colide(Rocket Rocket) {
+        public boolean collide(Rocket Rocket) {
             int distance = distance(this.posX + size / 2, this.posY + size / 2,
                     Rocket.posX + Rocket.size / 2, Rocket.posY + Rocket.size / 2);
             return distance  < Rocket.size / 2 + size / 2;
