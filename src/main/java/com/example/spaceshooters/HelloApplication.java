@@ -241,7 +241,7 @@ public class HelloApplication extends Application {
 
         public boolean toRemove;
 
-        int posX, posY, speed = 10;
+        int posX, posY, speed = 40;
         static final int size = 6;
 
         public Shot(int posX, int posY) {
