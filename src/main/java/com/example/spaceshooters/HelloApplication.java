@@ -7,8 +7,10 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
-
+import java.io.File;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -28,7 +30,14 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import java.io.FileNotFoundException;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
 
+
+import java.util.stream.Stream;
+import java.util.Collections;
+import java.util.stream.Collectors;
 public class HelloApplication extends Application {
 
     //variables
@@ -58,7 +67,7 @@ public class HelloApplication extends Application {
     private double mouseX;
     private int score;
     private int health;
-
+    private final int leaderboardSize = 3;
     //start
     public void start(Stage stage) throws Exception {
         try {
@@ -69,6 +78,41 @@ public class HelloApplication extends Application {
             System.out.println(System.getProperty("user.dir"));
             return;
         }
+        try {
+            BufferedReader csvReader = new BufferedReader(new FileReader("src/main/resources/leaderboard.csv"));
+            ArrayList<String> rows = new ArrayList<>();
+            String row;
+            while ((row = csvReader.readLine()) != null) {
+//                String[] data = row.split(",");
+//                // do something with the data
+                System.out.println(row);
+                rows.add(row);
+            }
+            // TODO: if player's score is high then only add to leaderboard
+
+            // code to read from csv - correct
+            rows.sort((r1, r2) -> Integer.parseInt(r1.split(",")[1]) < Integer.parseInt(r2.split(",")[1]) ? 1 :
+                    Integer.parseInt(r2.split(",")[1]) < Integer.parseInt(r1.split(",")[1]) ? -1 : 0);
+            FileWriter csvWriter = new FileWriter("src/main/resources/leaderboard.csv");
+            for (int i = 0; i < 2; i++) {
+                System.out.println(rows.get(i));
+            }
+            csvReader.close();
+
+            // code to write to csv, not working yet
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/leaderboard.csv", true));
+            // add logic to determine which rows to retain/delete
+            for (int i = 0; i < 2; i++) {
+                writer.write(rows.get(i));
+                writer.newLine();
+            }
+            writer.write("NEW PLAYER,65");
+            writer.newLine();
+            System.out.println("compeleted reading + writing");
+        } catch(Exception err) {
+            System.out.println(err);
+        }
+
 
         for (int i = 1; i <= 10; i++) {
             try {
@@ -90,6 +134,8 @@ public class HelloApplication extends Application {
         canvas.setOnMouseClicked(e -> {
             if(shots.size() < MAX_SHOTS) shots.add(player.shoot());
             if(gameOver) {
+                // add leaderboard logic here
+
                 gameOver = false;
                 setup();
             }
