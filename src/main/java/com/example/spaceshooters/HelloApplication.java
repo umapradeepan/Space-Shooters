@@ -136,11 +136,10 @@ public class HelloApplication extends Application {
         player.posX = (int) mouseX;
 
         Bombs.stream().peek(Rocket::update).peek(Rocket::draw).forEach(e -> {
-            if(player.collide(e) && !player.exploding) {
+            if (gameOver) {
                 player.explode();
             }
         });
-
 
         for (int i = shots.size() - 1; i >=0 ; i--) {
             Shot shot = shots.get(i);
@@ -165,7 +164,7 @@ public class HelloApplication extends Application {
             }
         }
 
-        gameOver = player.destroyed;
+        gameOver = health <= 0;
         if(RAND.nextInt(10) > 2) {
             univ.add(new Universe());
         }
