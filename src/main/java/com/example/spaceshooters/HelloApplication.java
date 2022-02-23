@@ -237,7 +237,9 @@ public class HelloApplication extends Application {
             if(!exploding && !destroyed) posY += SPEED;
             if(posY > HEIGHT) {
                 destroyed = true;
-                health -= 5;
+                if (!gameOver) {
+                    health -= 10;
+                }
             }
         }
     }
