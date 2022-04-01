@@ -1,6 +1,4 @@
 package com.example.spaceshooters;
-// Icon made by Freepik from www.flaticon.com
-// visit: https://www.youtube.com/user/CbX397/
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -67,7 +65,7 @@ public class HelloApplication extends Application {
     private double mouseX;
     private int score;
     private int health;
-    private final int leaderboardSize = 3;
+
     //start
     public void start(Stage stage) throws Exception {
         try {
@@ -78,41 +76,6 @@ public class HelloApplication extends Application {
             System.out.println(System.getProperty("user.dir"));
             return;
         }
-        try {
-            BufferedReader csvReader = new BufferedReader(new FileReader("src/main/resources/leaderboard.csv"));
-            ArrayList<String> rows = new ArrayList<>();
-            String row;
-            while ((row = csvReader.readLine()) != null) {
-//                String[] data = row.split(",");
-//                // do something with the data
-                System.out.println(row);
-                rows.add(row);
-            }
-            // TODO: if player's score is high then only add to leaderboard
-
-            // code to read from csv - correct
-            rows.sort((r1, r2) -> Integer.parseInt(r1.split(",")[1]) < Integer.parseInt(r2.split(",")[1]) ? 1 :
-                    Integer.parseInt(r2.split(",")[1]) < Integer.parseInt(r1.split(",")[1]) ? -1 : 0);
-            FileWriter csvWriter = new FileWriter("src/main/resources/leaderboard.csv");
-            for (int i = 0; i < 2; i++) {
-                System.out.println(rows.get(i));
-            }
-            csvReader.close();
-
-            // code to write to csv, not working yet
-            BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/resources/leaderboard.csv", true));
-            // add logic to determine which rows to retain/delete
-            for (int i = 0; i < 2; i++) {
-                writer.write(rows.get(i));
-                writer.newLine();
-            }
-            writer.write("NEW PLAYER,65");
-            writer.newLine();
-            System.out.println("compeleted reading + writing");
-        } catch(Exception err) {
-            System.out.println(err);
-        }
-
 
         for (int i = 1; i <= 10; i++) {
             try {
@@ -122,7 +85,6 @@ public class HelloApplication extends Application {
                 return;
             }
         }
-
 
         Canvas canvas = new Canvas(WIDTH, HEIGHT);
         gc = canvas.getGraphicsContext2D();
@@ -134,10 +96,7 @@ public class HelloApplication extends Application {
         canvas.setOnMouseClicked(e -> {
             if(shots.size() < MAX_SHOTS) shots.add(player.shoot());
             if(gameOver) {
-                // add leaderboard logic here
-
-                gameOver = false;
-                setup();
+                gameOver = true;
             }
         });
         setup();
@@ -165,14 +124,16 @@ public class HelloApplication extends Application {
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setFont(Font.font(20));
         gc.setFill(Color.WHITE);
-        gc.fillText("Score: " + score, 60,  20);
-        gc.fillText("Health : " + health, 700, 20);
+        gc.fillText("Score: " + score, 60,  30);
+        gc.fillText("Health : " + health, 700, 30);
+        gc.setFill(Color.YELLOW);
+        gc.fillText("Tridelta Booth 2022", 400, 30);
 
 
         if(gameOver) {
             gc.setFont(Font.font(35));
-            gc.setFill(Color.YELLOW);
-            gc.fillText("Game Over \n Your Score is: " + score + " \n Click to play again", WIDTH / 2, HEIGHT /2.5);
+            gc.setFill(Color.WHITE);
+            gc.fillText("Game Over! Thanks for playing :) \n Score: " + score, WIDTH / 2, HEIGHT /2.5);
             //	return;
         }
         univ.forEach(Universe::draw);
@@ -197,9 +158,11 @@ public class HelloApplication extends Application {
             shot.draw();
             for (Bomb bomb : Bombs) {
                 if(shot.collide(bomb) && !bomb.exploding) {
-                    score++;
-                    bomb.explode();
-                    shot.toRemove = true;
+                    if (!gameOver) {
+                        score++;
+                        bomb.explode();
+                        shot.toRemove = true;
+                    }
                 }
             }
         }
